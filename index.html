@@ -1,0 +1,223 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Stepwyse - Daily Word Association Game</title>
+    <meta name="description" content="Build semantic chains between words. A daily word puzzle that trains your brain.">
+    
+    <!-- Open Graph / Social Media -->
+    <meta property="og:title" content="Stepwyse - Daily Word Association Game">
+    <meta property="og:description" content="Build semantic chains between words. A daily word puzzle that trains your brain.">
+    <meta property="og:type" content="website">
+    
+    <link rel="stylesheet" href="styles.css">
+</head>
+<body>
+    <div class="container">
+        <!-- Header -->
+        <header>
+            <div class="header-content">
+                <h1 class="logo">STEPWYSE</h1>
+                <div class="header-buttons">
+                    <button class="icon-button" id="howToPlayBtn" aria-label="How to play">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <circle cx="12" cy="12" r="10"></circle>
+                            <path d="M9.09 9a3 3 0 0 1 5.83 1c0 2-3 3-3 3"></path>
+                            <line x1="12" y1="17" x2="12.01" y2="17"></line>
+                        </svg>
+                    </button>
+                    <button class="icon-button" id="statsBtn" aria-label="Statistics">
+                        <svg width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2">
+                            <line x1="12" y1="20" x2="12" y2="10"></line>
+                            <line x1="18" y1="20" x2="18" y2="4"></line>
+                            <line x1="6" y1="20" x2="6" y2="16"></line>
+                        </svg>
+                    </button>
+                </div>
+            </div>
+        </header>
+
+        <!-- Game Board -->
+        <main id="gameBoard" class="game-board">
+            <div class="game-info">
+                <p class="date-display" id="dateDisplay"></p>
+                <p class="objective">Connect <strong id="startWord"></strong> to <strong id="targetWord"></strong></p>
+            </div>
+
+            <!-- Tutorial Box - Always Visible -->
+            <div class="tutorial-box" id="tutorialBox">
+                <div class="tutorial-header">
+                    <h3>Quick Guide</h3>
+                    <button class="tutorial-dismiss" id="dismissTutorial">×</button>
+                </div>
+                <div class="tutorial-content">
+                    <p><strong>Goal:</strong> Build a word chain from <span class="tutorial-highlight">START</span> to <span class="tutorial-highlight">TARGET</span></p>
+                    <div class="tutorial-example">
+                        <div class="tutorial-step">OCEAN <span class="tutorial-arrow">→</span> <em>"bodies of water"</em></div>
+                        <div class="tutorial-step">LAKE <span class="tutorial-arrow">→</span> <em>"both reflect"</em></div>
+                        <div class="tutorial-step">MIRROR <span class="tutorial-arrow">→</span> <em>"makes music"</em></div>
+                        <div class="tutorial-step">MUSIC ✓</div>
+                    </div>
+                    <p class="tutorial-note">Each word must relate to the previous one. Explain how!</p>
+                </div>
+            </div>
+
+            <div class="chain-container" id="chainContainer">
+                <div class="chain-item start-word" id="chainStart">
+                    <span class="word" id="displayStartWord"></span>
+                </div>
+            </div>
+
+            <div class="input-section">
+                <div class="input-wrapper">
+                    <input 
+                        type="text" 
+                        id="wordInput" 
+                        class="word-input" 
+                        placeholder="Type a related word..."
+                        autocomplete="off"
+                        autocapitalize="off"
+                        spellcheck="false"
+                    >
+                    <button id="submitBtn" class="submit-btn">Add</button>
+                </div>
+                <p class="hint-text" id="hintText">Think of a word related to <span id="currentWord"></span></p>
+            </div>
+
+            <div class="connection-input" id="connectionInput" style="display: none;">
+                <p class="connection-prompt">How is <strong id="newWord"></strong> related to <strong id="prevWord"></strong>?</p>
+                <input 
+                    type="text" 
+                    id="connectionText" 
+                    class="connection-text-input" 
+                    placeholder="Both are types of..."
+                    maxlength="60"
+                >
+                <p class="connection-hint">Explain the connection briefly (3-60 characters)</p>
+                <div class="connection-buttons">
+                    <button id="submitConnection" class="submit-connection-btn">Submit</button>
+                    <button id="cancelConnection" class="cancel-connection-btn">Cancel</button>
+                </div>
+            </div>
+
+            <div class="game-actions">
+                <button id="giveUpBtn" class="give-up-btn">I'm stuck</button>
+            </div>
+        </main>
+
+        <!-- Results Screen -->
+        <div id="resultsScreen" class="results-screen" style="display: none;">
+            <div class="results-content">
+                <h2 class="results-title" id="resultsTitle">Complete!</h2>
+                <p class="results-subtitle">You connected the words in <strong id="chainLength">0</strong> steps</p>
+                
+                <div class="results-chain" id="resultsChain"></div>
+                
+                <div class="results-actions">
+                    <button id="shareBtn" class="share-btn">Share Your Chain</button>
+                    <button id="viewChainBtn" class="view-chain-btn">View on Board</button>
+                </div>
+            </div>
+        </div>
+
+        <!-- How to Play Modal -->
+        <div id="howToPlayModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>How to Play</h2>
+                    <button class="close-btn" id="closeHowToPlay">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="instructions">
+                        <div class="instruction-item">
+                            <div class="instruction-number">1</div>
+                            <div class="instruction-text">
+                                <strong>Build a chain</strong> from the start word to the target word
+                            </div>
+                        </div>
+                        <div class="instruction-item">
+                            <div class="instruction-number">2</div>
+                            <div class="instruction-text">
+                                <strong>Each word</strong> must be semantically related to the previous word
+                            </div>
+                        </div>
+                        <div class="instruction-item">
+                            <div class="instruction-number">3</div>
+                            <div class="instruction-text">
+                                <strong>Justify connections</strong> by explaining how words relate (3-60 characters)
+                            </div>
+                        </div>
+                        <div class="instruction-item">
+                            <div class="instruction-number">4</div>
+                            <div class="instruction-text">
+                                <strong>Shorter chains</strong> and creative connections score higher
+                            </div>
+                        </div>
+                    </div>
+                    <div class="example">
+                        <h3>Example</h3>
+                        <div class="example-chain">
+                            <div class="example-step">
+                                <span class="example-word">OCEAN</span>
+                                <span class="example-arrow">→</span>
+                                <span class="example-connection">bodies of water</span>
+                            </div>
+                            <div class="example-step">
+                                <span class="example-word">LAKE</span>
+                                <span class="example-arrow">→</span>
+                                <span class="example-connection">reflective surfaces</span>
+                            </div>
+                            <div class="example-step">
+                                <span class="example-word">MIRROR</span>
+                                <span class="example-arrow">→</span>
+                                <span class="example-connection">found in bathrooms</span>
+                            </div>
+                            <div class="example-step">
+                                <span class="example-word">SOAP</span>
+                            </div>
+                        </div>
+                    </div>
+                    <p class="tip"><strong>Tip:</strong> There's no single correct path. Be creative!</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Stats Modal -->
+        <div id="statsModal" class="modal">
+            <div class="modal-content">
+                <div class="modal-header">
+                    <h2>Statistics</h2>
+                    <button class="close-btn" id="closeStats">&times;</button>
+                </div>
+                <div class="modal-body">
+                    <div class="stats-grid">
+                        <div class="stat-box">
+                            <div class="stat-box-value" id="gamesPlayed">0</div>
+                            <div class="stat-box-label">Played</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-value" id="currentStreak">0</div>
+                            <div class="stat-box-label">Current Streak</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-value" id="maxStreak">0</div>
+                            <div class="stat-box-label">Max Streak</div>
+                        </div>
+                        <div class="stat-box">
+                            <div class="stat-box-value" id="avgSteps">0</div>
+                            <div class="stat-box-label">Avg Steps</div>
+                        </div>
+                    </div>
+                    <div class="next-puzzle">
+                        <p>Next Stepwyse</p>
+                        <p class="countdown" id="countdown">--:--:--</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <script src="game.js"></script>
+</body>
+</html>
